@@ -2,6 +2,17 @@ import { users, type User, type InsertUser } from "@shared/schema";
 
 // modify the interface with any CRUD methods
 // you might need
+// MemStorage.ts
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+}
+
+export interface InsertUser {
+  username: string;
+  email: string;
+}
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -29,11 +40,19 @@ export class MemStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
+    const existingUser = await this.getUserByUsername(insertUser.username);
+    if (existingUser) {
+      throw new Error('Username already taken');
+    }
+    
     const id = this.currentId++;
     const user: User = { ...insertUser, id };
     this.users.set(id, user);
     return user;
   }
 }
+
+export const storage = new MemStorage();
+
 
 export const storage = new MemStorage();
