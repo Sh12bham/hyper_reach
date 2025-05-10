@@ -1,6 +1,16 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+import cors from "cors";
+
+// Get the directory name of the current module
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Load environment variables from .env file
+dotenv.config({ path: path.resolve(__dirname, "..", ".env") });
 
 // Check for OpenRouter API key at startup
 function checkEnvironmentVariables() {
@@ -18,6 +28,13 @@ function checkEnvironmentVariables() {
 checkEnvironmentVariables();
 
 const app = express();
+
+// Enable CORS
+app.use(cors({
+  origin: ['http://localhost:5000', 'http://localhost:3000'],
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

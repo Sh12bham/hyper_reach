@@ -34,7 +34,7 @@ export function LeadsUpload({ onLeadsUploaded }: LeadsUploadProps) {
     formData.append('file', file);
 
     try {
-      const response = await fetch('/api/upload-csv', {
+      const response = await fetch('http://localhost:5000/api/upload-csv', {
         method: 'POST',
         body: formData,
       });

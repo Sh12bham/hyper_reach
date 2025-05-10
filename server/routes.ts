@@ -101,13 +101,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // OpenRouter API integration
       const openRouterApiKey = process.env.OPENROUTER_API_KEY;
       
-      // Check if API key is available
+      // Check if API key is available and clean it
       if (!openRouterApiKey) {
         return res.status(500).json({
           message: "Failed to generate emails",
           error: "OPENROUTER_API_KEY environment variable is not set"
         });
       }
+
+      // Clean the API key once at the start
+      const cleanApiKey = openRouterApiKey.trim().replace(/^["']|["']$/g, '');
       
       // Generate emails for each lead
       const generatedEmails: GeneratedEmail[] = [];
@@ -344,7 +347,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `;
 
       console.log(`Making API call to OpenRouter for lead: ${validatedData.lead.name}`);
-      console.log(`Using API key starting with: ${openRouterApiKey.substring(0, 10)}...`);
+      let cleanApiKey = "";
+      if (openRouterApiKey) {
+        cleanApiKey = openRouterApiKey.trim().replace(/^"|"$/g, '');
+        console.log(`Using API key starting with: ${cleanApiKey.substring(0, 10)}...`);
+      } else {
+        console.error("OPENROUTER_API_KEY environment variable is not set!");
+        throw new Error("OPENROUTER_API_KEY environment variable is not set");
+      }
         
       // Make API call to OpenRouter
       const requestBody = {
@@ -366,7 +376,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${openRouterApiKey}`,
+            "Authorization": `Bearer ${cleanApiKey}`,
             "HTTP-Referer": process.env.REPLIT_DOMAINS || "https://localhost:5000",
             "X-Title": "AI Email Generator"
           },
